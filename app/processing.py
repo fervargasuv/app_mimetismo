@@ -187,5 +187,7 @@ def evaluar_mimetismo(frames_p1,frames_p2,yaw_p1,yaw_p2,pitch_p1,pitch_p2,roll_p
 
     # Decidir si es mimetismo basado en la predicción (ajusta según tu caso)
     mimetismo = (prediccion > 0.5).astype(int)
-
-    return np.any(mimetismo)
+    if mimetismo == 1:
+        return True
+    else: 
+        return False
