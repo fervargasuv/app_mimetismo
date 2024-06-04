@@ -6,6 +6,11 @@ from processing import load_frames, detect_mimicry_with_shift
 import os
 
 
+def listar_participantes(experimento):
+    ruta_experimento = os.path.join('', experimento)
+    participantes = [os.path.join(ruta_experimento, d) for d in os.listdir(ruta_experimento) if os.path.isdir(os.path.join(ruta_experimento, d))]
+    return participantes
+
 def plot_mimetismo_timeline(mimetismo_intervals, total_frames):
     # Crear una línea de tiempo inicializada a 0 (sin mimetismo)
     timeline = np.zeros(total_frames)
