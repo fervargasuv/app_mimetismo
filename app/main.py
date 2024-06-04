@@ -43,7 +43,7 @@ def plot_mimetismo_timeline(mimetismo_intervals, total_frames):
         margin=dict(l=20, r=20, t=20, b=20)
     )
     
-    fig.show()
+    return fig
 
 def main():
     st.title("Detección de Mimetismo en Videos")
@@ -67,7 +67,12 @@ def main():
         
         st.write(results)
 
-        plot_mimetismo_timeline(results, len(datos_participante1["frames"]))
+        fig = plot_mimetismo_timeline(results, len(datos_participante1["frames"]))
+        
+        # Mostrar el gráfico con Streamlit
+        st.plotly_chart(fig)
+
+        
         # # Mostrar resultados
         # duration = len(frames1) / 6  # Suponiendo 50 fps (ajusta esto según la realidad de tus frames)
         # st.write("Duración del experimento:", duration, "segundos")
