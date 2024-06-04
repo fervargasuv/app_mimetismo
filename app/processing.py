@@ -119,41 +119,36 @@ def detect_mimicry_with_shift(data_persona1, data_persona2,shift=50):
     pitch_p2=data_persona2["pitch"]
 
 
-    for inicio in range(0, len(frames_p1) - ventana + 1, shift):
-        print(resultados_mimetismo)
+    inicio = 0
+    while inicio <= len(frames_p1) - ventana:
         fin = inicio + ventana
-        # Verificar si el final de la ventana está dentro de los límites del video de la persona 1
         if fin > len(frames_p1):
-            break  # Salir del bucle si el final de la ventana está fuera de los límites del video de la persona 1
-
-            # Calcular el mimetismo dentro de la ventana de tiempo
-        mimetismo = evaluar_mimetismo(frames_p1[inicio:fin], frames_p2[inicio:fin],yaw_p1[inicio:fin],yaw_p2[inicio:fin],pitch_p1[inicio:fin],pitch_p2[inicio:fin],roll_p1[inicio:fin],roll_p2[inicio:fin])
+            break
+        
+        # Calcular el mimetismo dentro de la ventana de tiempo
+        mimetismo = evaluar_mimetismo(frames_p1[inicio:fin], frames_p2[inicio:fin], yaw_p1[inicio:fin], yaw_p2[inicio:fin], pitch_p1[inicio:fin], pitch_p2[inicio:fin], roll_p1[inicio:fin], roll_p2[inicio:fin], modelo)
+        
         if mimetismo:
-            resultados_mimetismo.append([inicio,fin])
-            continue
+            resultados_mimetismo.append([inicio, fin])
+            # Avanzar el análisis 4 segundos (200 frames) si se detecta mimetismo
+            inicio = fin + 200
         else:
+            encontrado_mimetismo = False
             for desfase in range(1, 5):  # Rango de 1 a 4 segundos de desfase
                 desfase_frames = desfase * 50  # Convertir segundos a frames
-
-                # Calcular ventanas de tiempo para la persona 2
                 ventana_inicio_persona2 = inicio + desfase_frames
                 ventana_fin_persona2 = fin + desfase_frames
 
-                # Verificar si las ventanas son válidas
-                if ventana_fin_persona2 < len(data_persona2):
-                    # Realizar la evaluación de mimetismo dentro de la ventana de tiempo
-                    mimetismo = evaluar_mimetismo(frames_p1[inicio:fin], frames_p2[ventana_inicio_persona2:ventana_fin_persona2],yaw_p1[inicio:fin],yaw_p2[ventana_inicio_persona2:ventana_fin_persona2],
-                                                  pitch_p1[inicio:fin],pitch_p2[ventana_inicio_persona2:ventana_fin_persona2],roll_p1[inicio:fin],roll_p2[ventana_inicio_persona2:ventana_fin_persona2]
-                                                )
+                if ventana_fin_persona2 <= len(frames_p2):
+                    mimetismo = evaluar_mimetismo(frames_p1[inicio:fin], frames_p2[ventana_inicio_persona2:ventana_fin_persona2], yaw_p1[inicio:fin], yaw_p2[ventana_inicio_persona2:ventana_fin_persona2], pitch_p1[inicio:fin], pitch_p2[ventana_inicio_persona2:ventana_fin_persona2], roll_p1[inicio:fin], roll_p2[ventana_inicio_persona2:ventana_fin_persona2], modelo)
                     
-                    # Si se detecta mimetismo, puedes realizar las acciones correspondientes
                     if mimetismo:
-                        resultados_mimetismo.append([inicio,fin])
-                        break  # Salir del bucle si se detecta mimetismo
-                else:
-                    # Si las ventanas no son válidas, pasar al siguiente desfase
-                    continue
-
+                        resultados_mimetismo.append([inicio, fin])
+                        encontrado_mimetismo = True
+                        inicio = fin + 200  # Avanzar el análisis 4 segundos (200 frames) si se detecta mimetismo
+                        break
+            if not encontrado_mimetismo:
+                inicio += shift                
         
     return resultados_mimetismo
 
@@ -193,4 +188,4 @@ def evaluar_mimetismo(frames_p1,frames_p2,yaw_p1,yaw_p2,pitch_p1,pitch_p2,roll_p
     # Decidir si es mimetismo basado en la predicción (ajusta según tu caso)
     mimetismo = (prediccion > 0.5).astype(int)
 
-    return mimetismo
+    return np.any(mimetismo)
