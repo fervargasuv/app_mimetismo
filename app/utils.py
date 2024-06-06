@@ -1,0 +1,77 @@
+# import streamlit as st
+# from pathlib import Path
+# import numpy as np
+# import plotly.graph_objects as go
+# from processing import load_frames, detect_mimicry_with_shift
+# import os
+
+
+# def listar_participantes(experimento):
+#     ruta_experimento = os.path.join('', experimento)
+#     participantes = [os.path.join(ruta_experimento, d) for d in os.listdir(ruta_experimento) if os.path.isdir(os.path.join(ruta_experimento, d))]
+#     return participantes
+
+# def plot_mimetismo_timeline(mimetismo_intervals, total_frames):
+#     # Crear una línea de tiempo inicializada a 0 (sin mimetismo)
+#     timeline = np.zeros(total_frames)
+    
+#     # Marcar los intervalos de mimetismo con 1
+#     for start, end in mimetismo_intervals:
+#         timeline[start:end] = 1
+    
+#     # Crear gráfico de la línea de tiempo con Plotly
+#     fig = go.Figure()
+    
+#     x = np.arange(len(timeline)) / 50  # Convertir frames a segundos
+#     colors = ['green' if val == 1 else 'red' for val in timeline]
+    
+#     fig.add_trace(go.Scatter(
+#         x=x, y=np.ones_like(x),
+#         mode='markers',
+#         marker=dict(color=colors, size=10),
+#         hoverinfo='text',
+#         text=[f'Mimetismo: {"Sí" if val == 1 else "No"}' for val in timeline]
+#     ))
+    
+#     # Configurar el eje x con etiquetas de tiempo
+#     fig.update_layout(
+#         title="Línea de Tiempo de Mimetismo",
+#         xaxis_title='Tiempo (segundos)',
+#         yaxis=dict(showticklabels=False),
+#         showlegend=False,
+#         height=200,
+#         margin=dict(l=20, r=20, t=20, b=20)
+#     )
+    
+#     return fig
+
+# def main():
+#     st.title("Detección de Mimetismo en Videos")
+#     st.write("Este es un ejemplo de aplicación de detección de mimetismo.")
+    
+#     # Seleccionar experimento
+#     experiment_path = st.selectbox("Selecciona un experimento", ["experimento1", "experimento12"])
+#     if experiment_path:
+#         experiment_path = Path(f"./data/{experiment_path}")
+#         participantes=listar_participantes(experiment_path)
+#         participante_1=participantes[0]
+#         participante_2=participantes[1]
+
+#         datos_participante1=load_frames(participante_1)
+#         datos_participante2=load_frames(participante_2)
+
+#         st.write(len(datos_participante1["frames"]))
+#         st.write(len(datos_participante2["frames"]))
+#         # Procesar el experimento
+#         results=detect_mimicry_with_shift(datos_participante1,datos_participante2)
+        
+#         st.write(results)
+
+#         fig = plot_mimetismo_timeline(results, len(datos_participante1["frames"]))
+        
+#         # Mostrar el gráfico con Streamlit
+#         st.plotly_chart(fig)
+
+
+# if __name__ == "__main__":
+#     main()

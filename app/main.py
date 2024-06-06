@@ -11,31 +11,70 @@ def listar_participantes(experimento):
     participantes = [os.path.join(ruta_experimento, d) for d in os.listdir(ruta_experimento) if os.path.isdir(os.path.join(ruta_experimento, d))]
     return participantes
 
-def plot_mimetismo_timeline(mimetismo_intervals, total_frames):
-    # Crear una línea de tiempo inicializada a 0 (sin mimetismo)
+
+# def plot_mimetismo_timeline(mimetismo_intervals, total_frames):
+#     # Crear una línea de tiempo inicializada a 0 (sin mimetismo)
+#     timeline = np.zeros(total_frames)
+    
+#     # Marcar los intervalos de mimetismo con 1
+#     for start, end,participantes in mimetismo_intervals:
+#         if participantes == 1:
+#             timeline[start:end] = 1
+#         if participantes == 2:
+#             timeline[start:end] = 2
+#         if participantes == 3:
+#             timeline[start:end] = 3
+#         if participantes == 4:
+#             timeline[start:end] = 4
+
+#     # Crear gráfico de la línea de tiempo con Plotly
+#     fig = go.Figure()
+    
+#     x = np.arange(len(timeline)) / 50  # Convertir frames a segundos
+#     colors = ['green' if val == 1 else 'blue' if val == 2 else 'orange' if val == 3 else 'pink' if val == 4 else 'red' for val in timeline]
+
+    
+#     fig.add_trace(go.Scatter(
+#         x=x, y=np.ones_like(x),
+#         mode='markers',
+#         marker=dict(color=colors, size=10),
+#         hoverinfo='text',
+#         text=[f'Participante {int(val)}' if val in [1, 2, 3, 4] else 'No Mimetismo' for val in timeline]
+#     ))
+    
+#     # Configurar el eje x con etiquetas de tiempo
+#     fig.update_layout(
+#         title="Línea de Tiempo de Mimetismo",
+#         xaxis_title='Tiempo (segundos)',
+#         yaxis=dict(showticklabels=False),
+#         showlegend=False,
+#         height=200,
+#         margin=dict(l=20, r=20, t=20, b=20)
+#     )
+    
+#     return fig
+
+def plot_mimetismo_timeline(mimetismo_intervals, total_frames, participant_number):
     timeline = np.zeros(total_frames)
+    for start, end, other_participant in mimetismo_intervals:
+        timeline[start:end] = other_participant
+
+    colors = ['green' if val == 1 else 'blue' if val == 2 else 'brown' if val == 3 else 'pink' if val == 4 else 'red' for val in timeline]
+    hover_texts = [f'Participante {int(val)}' if val in [1, 2, 3, 4] else 'No Mimetismo' for val in timeline]
     
-    # Marcar los intervalos de mimetismo con 1
-    for start, end in mimetismo_intervals:
-        timeline[start:end] = 1
-    
-    # Crear gráfico de la línea de tiempo con Plotly
     fig = go.Figure()
-    
     x = np.arange(len(timeline)) / 50  # Convertir frames a segundos
-    colors = ['green' if val == 1 else 'red' for val in timeline]
     
     fig.add_trace(go.Scatter(
         x=x, y=np.ones_like(x),
         mode='markers',
         marker=dict(color=colors, size=10),
         hoverinfo='text',
-        text=[f'Mimetismo: {"Sí" if val == 1 else "No"}' for val in timeline]
+        text=hover_texts
     ))
     
-    # Configurar el eje x con etiquetas de tiempo
     fig.update_layout(
-        title="Línea de Tiempo de Mimetismo",
+        title=f"Línea de Tiempo de Mimetismo para Participante {participant_number}",
         xaxis_title='Tiempo (segundos)',
         yaxis=dict(showticklabels=False),
         showlegend=False,
@@ -46,66 +85,39 @@ def plot_mimetismo_timeline(mimetismo_intervals, total_frames):
     return fig
 
 def main():
-    st.title("Detección de Mimetismo en Videos")
-    st.write("Este es un ejemplo de aplicación de detección de mimetismo.")
-    
     # Seleccionar experimento
     experiment_path = st.selectbox("Selecciona un experimento", ["experimento1", "experimento12"])
     if experiment_path:
         experiment_path = Path(f"./data/{experiment_path}")
-        participantes=listar_participantes(experiment_path)
-        participante_1=participantes[0]
-        participante_2=participantes[1]
+        participantes = listar_participantes(experiment_path)
 
-        datos_participante1=load_frames(participante_1)
-        datos_participante2=load_frames(participante_2)
+        if len(participantes) >= 4:
+            datos = {}
+            for i, participante in enumerate(participantes[:4], start=1):
+                datos[f"p{i}"] = load_frames(participante)
 
-        st.write(len(datos_participante1["frames"]))
-        st.write(len(datos_participante2["frames"]))
-        # Procesar el experimento
-        results=detect_mimicry_with_shift(datos_participante1,datos_participante2)
-        
-        st.write(results)
+            total_frames = len(datos["p1"]["frames"])
+            st.write(f"Total frames: {total_frames}")
 
-        fig = plot_mimetismo_timeline(results, len(datos_participante1["frames"]))
-        
-        # Mostrar el gráfico con Streamlit
-        st.plotly_chart(fig)
+            resultados = {f'p{i}': [] for i in range(1, 5)}
+            
+            for p1 in range(1, 5):
+                for p2 in range(1, 5):
+                    if p1 != p2:
+                        detecciones = detect_mimicry_with_shift(datos[f"p{p1}"], datos[f"p{p2}"])
+                        if len(detecciones[0]) == 2:
+                            resultados[f'p{p1}'].extend([(start, end, p2) for (start, end) in detecciones])
+                        else:
+                            resultados[f'p{p1}'].extend([(start, end, p2) for (start, end, _, is_mimetismo) in detecciones if is_mimetismo])
 
-        
-        # # Mostrar resultados
-        # duration = len(frames1) / 6  # Suponiendo 50 fps (ajusta esto según la realidad de tus frames)
-        # st.write("Duración del experimento:", duration, "segundos")
-        
-        # timeline = np.zeros(len(frames1))
-        # for start1, end1, offset, is_mimetismo in results:
-        #     if is_mimetismo:
-        #         timeline[start1:end1] = 1
-        
-        # # Crear gráfico de la línea de tiempo con Plotly
-        # fig = go.Figure()
-        
-        # x = np.arange(len(timeline)) / 50  # Convertir frames a segundos
-        # colors = ['green' if val == 1 else 'red' for val in timeline]
-        
-        # fig.add_trace(go.Scatter(
-        #     x=x, y=np.ones_like(x),
-        #     mode='markers',
-        #     marker=dict(color=colors, size=10),
-        #     hoverinfo='text',
-        #     text=[f'Mimetismo: {"Sí" if val == 1 else "No"}' for val in timeline]
-        # ))
-        
-        # # Configurar el eje x con etiquetas de tiempo
-        # fig.update_layout(
-        #     xaxis_title='Tiempo (segundos)',
-        #     yaxis=dict(showticklabels=False),
-        #     showlegend=False,
-        #     height=200,
-        #     margin=dict(l=20, r=20, t=20, b=20)
-        # )
-        
-        # st.plotly_chart(fig)
+            for p in range(1, 5):
+                st.write(f"Resultados para participante {p}: {resultados[f'p{p}']}")
+                fig = plot_mimetismo_timeline(resultados[f'p{p}'], total_frames, p)
+                st.plotly_chart(fig)
+        else:
+            st.write("Se necesitan al menos 4 participantes para esta visualización.")
 
 if __name__ == "__main__":
     main()
+    
+#[[P1]]
