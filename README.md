@@ -24,6 +24,12 @@ donde la capa LSTM captura las dependencias temporales en las secuencias, esto p
 
 despues se pasa a la clasificacion utilizando capas Dense del modelo que aplican la clasificacion final.
 
+
+Se utilizo una validacion cruzada para evaluar los datos utilizando K-folds que divide los datos de entrenamiento en distintos subconjuntos y realiza una primera evaluacion (esto sin los datos de test solamente con los de entrenamiento) para ver como se comporta el modelo.
+
+el mejor resultado estuvo cerca de un 70% de precision, con 774 epochs y un batch size de 128 (utilize un metodo randomico para evaluar con diferentes parametros). pero en su mayoria los resultados rondaban el 60% de precision.
+
+
 Puntos a considerar , la eleccion de LSTM fue en base a que se utilizan secuencias temporales, la CNN se utilizo para mejorar el modelo, pero es posible que existan otros modelos que puedan permitir una mejor prediccion en los casos de mimetismo o que se adecuen a los datos utilizados, tambien hace falta considerar mas caracteristicas no verbales, como son movimientos de las personas (brazos,manos,cuerpo) y caractedisticas prosodicas del audio (tono de la voz, intensidad,etc) esto para lograr un analisis mas completo de cada participante en los experimentos, el por que no se utilizaron en esta etapa es dado que los datos entregados por [sewa](https://db.sewaproject.eu) no contemplan todas estas posibilidad y hay que realizar un reprocesamiento de los datos con distintas herramientas a las que se utilizaron como mediapipe para analizar las caras o movimientos, o herramientas que permitan obtener mas caracteristicas de audio, tambien existen transcripciones que permiten un analisis enfocado a lo verbal.
 
 Porfavor igualmente revisar este paper que ve acerca de la deteccion de mimetismo (DOI: 10.1109/ACII.2013.27) donde utilizan LSTM y modelos de regresion , pero se basan en comportamientos no verbables en particular como sonrisa, enojo , etc, y en nuestro caso se busca una deteccion mas amplia considerando todos los aspectos de las personas, igualmente en ese paper se utilizo otra base de datos llamada MAHNOB (busque acceso a esa base de datos pero esta caida la pagina dado que es del 2013 aprox).
