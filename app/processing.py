@@ -4,6 +4,9 @@ import os
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 from keras.models import load_model
 import keras as keras
+import tensorflow as tf
+@tf.function(reduce_retracing=True)
+
 
 def load_frames(participante):
     lista_frames,lista_yaw,lista_pitch,lista_roll=read_landmarks_frames(participante)
@@ -183,7 +186,7 @@ def evaluar_mimetismo(frames_p1,frames_p2,yaw_p1,yaw_p2,pitch_p1,pitch_p2,roll_p
     matriz_flatten_reshaped = matriz_flatten.reshape((1, num_timesteps, n_length, num_features))
 
     # Hacer la predicción
-    prediccion = modelo.predict(matriz_flatten_reshaped)
+    prediccion = modelo.predict(matriz_flatten_reshaped,verbose=0)
 
     # Decidir si es mimetismo basado en la predicción (ajusta según tu caso)
     mimetismo = (prediccion > 0.5).astype(int)

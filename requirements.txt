@@ -6,3 +6,4 @@ opencv-python-headless
 tensorflow
 plotly
 keras
+pandas
