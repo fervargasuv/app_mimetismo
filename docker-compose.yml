@@ -6,12 +6,6 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8501:8501"
+      - "80:80"
     environment:
       - PYTHONUNBUFFERED=1
-    deploy:
-      resources:
-        limits:
-          memory: 4g
-        reservations:
-          memory: 2g
