@@ -16,5 +16,8 @@ COPY app app
 # Instalar las dependencias de Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Ejecutar la aplicación
+# Exponer el puerto
+EXPOSE 8501
+
+# Comando para ejecutar la aplicación
 CMD ["streamlit", "run", "app/main.py"]
