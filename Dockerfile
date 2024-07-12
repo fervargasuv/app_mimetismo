@@ -17,7 +17,7 @@ COPY app app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Exponer el puerto
-EXPOSE 8501
+EXPOSE 80
 
 # Comando para ejecutar la aplicación
-CMD ["streamlit", "run", "app/main.py"]
+CMD ["streamlit", "run", "app/main.py", "--server.port=80"]
