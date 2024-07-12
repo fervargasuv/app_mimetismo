@@ -1,11 +1,11 @@
-import cv2
 import numpy as np
 import os
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 from keras.models import load_model
 import keras as keras
 import tensorflow as tf
-@tf.function(reduce_retracing=True)
+# @tf.function(reduce_retracing=True)
+# @tf.autograph.experimental.do_not_convert
 
 
 def load_frames(participante):
